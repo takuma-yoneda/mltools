@@ -6,7 +6,8 @@ import subprocess
 
 parser = argparse.ArgumentParser()
 args, extra_args = parser.parse_known_args()
-subprocess.Popen(["nohup", "Xdummy"], stdout=open('/dev/null', 'w'), stderr=open('/dev/null', 'w'))
+# subprocess.Popen(["nohup", "Xdummy"], stdout=open('/dev/null', 'w'), stderr=open('/dev/null', 'w'))
+subprocess.Popen(["nohup", "Xdummy"], stdout=open('/dev/null', 'w'))
 os.environ['DISPLAY'] = ':0'
 if not extra_args:
     sys.argv = ['/bin/bash']

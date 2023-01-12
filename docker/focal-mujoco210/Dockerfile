@@ -14,6 +14,10 @@ RUN ln -s `which python3.9` /usr/bin/python
 RUN wget https://bootstrap.pypa.io/get-pip.py
 RUN python get-pip.py && rm get-pip.py
 
+# "pip install mujoco" somehow tries to find pip by absolute path
+RUN ln -s /usr/local/bin/pip /usr/bin/pip
+RUN pip install mujoco
+
 ENV PIP_NO_CACHE_DIR=1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tree \
@@ -95,6 +99,10 @@ RUN mkdir -p /usr/local/etc/mujoco \
     && rm mujoco.tar.gz
 ENV MUJOCO_PY_MUJOCO_PATH="/usr/local/etc/mujoco/mujoco210"
 ENV LD_LIBRARY_PATH="/usr/local/etc/mujoco/mujoco210/bin"
+
+# deepmind control suite reads from this env var
+ENV MJLIB_PATH="/usr/local/etc/mujoco/mujoco210/bin/libmujoco210.so"
+
 # Compile-time library location
 ENV LIBRARY_PATH=$LD_LIBRARY_PATH
 RUN ln -s /usr/local/etc/mujoco $HOME/.mujoco \
@@ -119,9 +127,23 @@ RUN chmod -R a+w /usr/local/lib/python3.9/dist-packages/mujoco_py/generated
 RUN pip install \
     wandb \
     kornia \
-    ffmpeg \
     imageio \
     imageio-ffmpeg \
     moviepy
 
+RUN apt-get update && apt-get install -y vim unzip xvfb patchelf cmake swig
+RUN apt-get update && apt-get install -y libssl-dev libcurl4-openssl-dev  # Needed for pyCurl
+RUN apt-get update && apt-get install -y \
+    libglu1-mesa-dev \
+    libopenmpi-dev  zlib1g-dev \
+    qtdeclarative5-dev libglib2.0-0 \
+    libosmesa6 \
+    libglfw3-dev \
+    net-tools \
+    xpra \
+    xserver-xorg-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# It may not work, we should double check
 ENTRYPOINT ["/opt/mujoco_py/vendor/Xdummy-entrypoint"]
